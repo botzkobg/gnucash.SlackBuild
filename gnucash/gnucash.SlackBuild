@@ -100,7 +100,6 @@ PKG_CONFIG_LIBDIR=${REQ_PKG}/usr/lib${LIBDIRSUFFIX}/pkgconfig \
   --docdir=/usr/doc/$PRGNAM-$VERSION \
   --build=$ARCH-slackware-linux \
   --enable-static=libgoffice \
-  --disable-dbi \
   --enable-html-docs \
   $OPT_ARGS
 
