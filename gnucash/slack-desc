@@ -6,14 +6,14 @@
 # customary to leave one space after the ':' except on otherwise blank lines.
 
        |-----handy-ruler------------------------------------------------------|
-gnucash: GnuCash
+gnucash: gnucash (financial accounting application)
 gnucash:
-gnucash: GnuCash is personal and small-business financial-accounting software,
-gnucash: freely licensed under the GNU GPL and available for GNU/Linux, BSD, 
-gnucash: Solaris, Mac OS X and Microsoft Windows.
-gnucash: 
-gnucash: Home: http://www.gnucash.org/
+gnucash: GnuCash is personal and small-business financial-accounting software.
 gnucash:
+gnucash: Designed to be easy to use, yet powerful and flexible, GnuCash allows
+gnucash: you to track bank accounts, stocks, income and expenses. As quick and
+gnucash: intuitive to use as a checkbook register, it is based on professional
+gnucash: accounting principles to ensure balanced books and accurate reports.
 gnucash:
-gnucash:
+gnucash: Homepage: http://gnucash.org/
 gnucash:

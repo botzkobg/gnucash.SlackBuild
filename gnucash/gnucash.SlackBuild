@@ -2,7 +2,7 @@
 
 # Slackware build script for gnucash
 
-# Copyright 2012 Trayan Denev, Bulgaria
+# Copyright 2015  Trayan Denev, tdenev@gmail.com
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -23,12 +23,9 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 PRGNAM=gnucash
-VERSION=2.6.5
+VERSION=${VERSION:-2.6.6}
 BUILD=${BUILD:-1}
 TAG=${TAG:-_SBo}
-
-REQ_PRGNAM=goffice
-REQ_VERSION=0.8.17
 
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
@@ -46,10 +43,6 @@ OUTPUT=${OUTPUT:-/tmp}
 DBI=${DBI:-false}
 OPT_ARGS=""
 
-REQ_PKG=$TMP/package-$REQ_PRGNAM
-
-TMP=$TMP PRGNAM=$REQ_PRGNAM VERSION=$REQ_VERSION  sh req_goffice.SlackBuild
-
 if [ "$ARCH" = "i486" ]; then
   SLKCFLAGS="-O2 -march=i486 -mtune=i686"
   LIBDIRSUFFIX=""
@@ -59,6 +52,12 @@ elif [ "$ARCH" = "i686" ]; then
 elif [ "$ARCH" = "x86_64" ]; then
   SLKCFLAGS="-O2 -fPIC"
   LIBDIRSUFFIX="64"
+elif [ "$ARCH" = "s390" ]; then
+  SLKCFLAGS="-O2"
+  LIBDIRSUFFIX=""
+elif [ "$ARCH" = "arm" ]; then
+  SLKCFLAGS="-O2 -march=armv4t"
+  LIBDIRSUFFIX=""
 else
   SLKCFLAGS="-O2"
   LIBDIRSUFFIX=""
@@ -67,6 +66,7 @@ fi
 if [ ! "$DBI" = "false" ] ; then
   OPT_ARGS+="--enable-dbi --with-dbi-dbd-dir=/usr/lib${LIBDIRSUFFIX}/dbd/ "
   echo $0 : building with dbi enabled
+  sleep 0.5
 else
   OPT_ARGS+="--disable-dbi "
 fi
@@ -88,46 +88,46 @@ find -L . \
 
 CFLAGS="$SLKCFLAGS" \
 CXXFLAGS="$SLKCFLAGS" \
-LDFLAGS=-L${REQ_PKG}/usr/lib${LIBDIRSUFFIX} \
-CPPFLAGS=-I${REQ_PKG}/usr/include/libgoffice-0.8 \
-PKG_CONFIG_LIBDIR=${REQ_PKG}/usr/lib${LIBDIRSUFFIX}/pkgconfig \
 ./configure \
   --prefix=/usr \
   --libdir=/usr/lib${LIBDIRSUFFIX} \
   --sysconfdir=/etc \
   --localstatedir=/var \
+  --infodir=/usr/info \
   --mandir=/usr/man \
   --docdir=/usr/doc/$PRGNAM-$VERSION \
+  --enable-python \
+  --enable-ofx \
+  --disable-aqbanking \
+  --disable-schemas-compile \
   --build=$ARCH-slackware-linux \
-  --enable-static=libgoffice \
-  --enable-html-docs \
   $OPT_ARGS
 
-make
+# --enable-register2 (not ready for 2.6.0 release)
 
-make install DESTDIR=$PKG
+make
+make -j1 install DESTDIR=$PKG docdir=/usr/doc/$PRGNAM-$VERSION
 
 find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
   | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null || true
 
-#Compress man pages
 find $PKG/usr/man -type f -exec gzip -9 {} \;
 for i in $( find $PKG/usr/man -type l ) ; do ln -s $( readlink $i ).gz $i.gz ; rm $i ; done
 
-#Move config files to .new
+# Don't clobber these
 mv $PKG/etc/gnucash/environment $PKG/etc/gnucash/environment.new
 mv $PKG/etc/gnucash/config $PKG/etc/gnucash/config.new
 
-#Add documentation
 mkdir -p $PKG/usr/doc/$PRGNAM-$VERSION
-cp AUTHORS COPYING DOCUMENTERS HACKING INSTALL LICENSE NEWS README README.dependencies TODO $PKG/usr/doc/$PRGNAM-$VERSION/
+cp -a \
+  AUTHORS COPYING ChangeLog DOCUMENTERS HACKING LICENSE NEWS README* TODO \
+  $PKG/usr/doc/$PRGNAM-$VERSION
 cat $CWD/$PRGNAM.SlackBuild > $PKG/usr/doc/$PRGNAM-$VERSION/$PRGNAM.SlackBuild
 
-#Install script and description
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 cat $CWD/doinst.sh > $PKG/install/doinst.sh
 
-#Make package
 cd $PKG
-/sbin/makepkg -l y -c n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.${PKGTYPE:-tgz}
+/sbin/makepkg -p -l y -c n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.${PKGTYPE:-tgz}
+
